@@ -235,7 +235,7 @@ Like COOP and COEP, Document-Isolation-Policy implies `Origin-Agent-Cluster: 1`.
 ### Impact on agent clustering
 First, we leverage the [crossOriginIsolationMode](https://html.spec.whatwg.org/#cross-origin-isolation-mode) concept in the HTML spec. CrossOriginIsolationMode has three values:
 - None: the default of the web.
-- Logical: the context is constrained in its interactions with other contexts, but the browser is backing this isolation by process isolation.
+- Logical: the context is constrained in its interactions with other contexts, but the browser is not backing this isolation by process isolation.
 - Concrete: the context is constrained in its interactions with other contexts and the browser is backing this isolation with process isolation. The document is eligible to get access to COI-gated APIs (if ok with Permission Policy).
 
 We then define an IsolationKey, which is composed of:
@@ -288,7 +288,7 @@ If a document has a Document-Isolation-Policy of `isolate-and-require-corp` or `
 
 In this case, all top-level documents in the browsing context group have COEP and COOP. This gives them access to COI-gated APIs, backed by process isolation of the browsing context group.
 
-In this case, documents have an agent cluster key of `{document origin, {top-level origin, cconcrete}}`. The top-level origin is guaranteed to be the same for all documents in the browsing context group due to COOP same-origin.
+In this case, documents have an agent cluster key of `{document origin, {top-level origin, concrete}}`. The top-level origin is guaranteed to be the same for all documents in the browsing context group due to COOP same-origin.
 
 If a document has a Document-Isolation-Policy of `isolate-and-require-corp` or `isolate-and-credentialless`, and the browser can support process isolation for the document, then its agent cluster key will be `{document origin, {document origin, crossOriginIsolation}}`. Note that this may happen in a credentialless iframe, and the document will also get access to COI in this case.
 
@@ -321,7 +321,7 @@ Document-Isolation-Policy can apply checks on subresources that are similar to C
 `Document-Isolation-Policy: credentialless` requires cross-origin subresource requests made without CORS to be loaded without credentials. We’ll extend the check in the [main Fetch algorithm](https://fetch.spec.whatwg.org/#http-network-or-cache-fetch) so that it also applies to Document-Isolation-policy and not just COEP credentialless.
 
 ### Inheritance
-Document-Isolation-Policy will be stored in the PolicyContainer and follow the regular inheritance model for policy inheritance (unlike COOP and COEP). The underlying process isolation ensures that documents with Document-Isolation-Policy only share their process with same-origin documents that are crossOriginIsolated. So any new document created by the DIP document in the same process should also be same-origin and crossOriginIsolated. The standard behavior for policy inheritance is to inherit the origin from the creator, and its security policies. In this case, the document would inherit its origin and Document-Isolation-Policy from its creator, making crossOriginIsolated.
+Document-Isolation-Policy will be stored in the PolicyContainer and follow the regular inheritance model for policy inheritance (unlike COOP and COEP). The underlying process isolation ensures that documents with Document-Isolation-Policy only share their process with same-origin documents that are crossOriginIsolated. So any new document created by the DIP document in the same process should also be same-origin and crossOriginIsolated. The standard behavior for policy inheritance is to inherit the origin from the creator, and its security policies. In this case, the document would inherit its origin and Document-Isolation-Policy from its creator, making it crossOriginIsolated.
 
 ### Interactions with workers
 Document-Isolation-State and the crossOriginIsolation status should be inherited from the creator of a DedicatedWorker or a SharedWorker.
